@@ -1,0 +1,31 @@
+{
+  "style": "local:///ui/style/tech/tech.juis",
+  "bounds": {
+    "width": 130,
+    "height": 40
+  },
+  "controls": [
+    {
+      "type": "button",
+      "name": "btnPreviewSprite",
+      "location": {
+        "x": 5,
+        "y": 10
+      },
+      "config": {
+        "text": "Preview Sprite"
+      }
+    },
+    {
+      "type": "button",
+      "name": "btnOpenWorld",
+      "location": {
+        "x": 60,
+        "y": 10
+      },
+      "config": {
+        "text": "Open World"
+      }
+    }
+  ]
+}
