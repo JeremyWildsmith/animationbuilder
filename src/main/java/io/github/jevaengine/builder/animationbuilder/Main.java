@@ -76,6 +76,7 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.name.Names;
+import java.lang.reflect.InvocationTargetException;
 
 public class Main implements WindowListener, Runnable
 {
@@ -118,7 +119,7 @@ public class Main implements WindowListener, Runnable
 		try(InputStream configSource = new FileInputStream(new File(m_assetSource.toURI().resolve("./" + CONFIG_NAME))))
 		{
 			WorldBuilderConfiguration config = JsonVariable.create(configSource).getValue(WorldBuilderConfiguration.class);
-			m_sceneBufferFactory = new TopologicalOrthographicProjectionSceneBufferFactory(config.projection, true);
+			m_sceneBufferFactory = new TopologicalOrthographicProjectionSceneBufferFactory(config.projection);
 		} catch (FileNotFoundException e)
 		{
 			m_logger.error("The specified project directory does not contain the builder configuration document: " + CONFIG_NAME + ". You will not be able to perform some critical tasks in the world builder.", e);
@@ -128,6 +129,7 @@ public class Main implements WindowListener, Runnable
 		}
 	}
 
+	@Override
 	public void run()
 	{
 		m_frame = new JFrame();
@@ -136,7 +138,7 @@ public class Main implements WindowListener, Runnable
 		{
 			SwingUtilities.invokeAndWait(new Runnable()
 			{
-
+				@Override
 				public void run()
 				{
 					m_frame.setCursor(Toolkit.getDefaultToolkit().createCustomCursor(Toolkit.getDefaultToolkit().getImage(""), new Point(), "trans"));
@@ -151,7 +153,7 @@ public class Main implements WindowListener, Runnable
 					m_frame.addWindowListener(Main.this);
 				}
 			});
-		} catch (Exception ex)
+		} catch (InterruptedException | InvocationTargetException ex)
 		{
 			JOptionPane.showMessageDialog(null, "An error occured initializing the game: " + ex);
 			return;
