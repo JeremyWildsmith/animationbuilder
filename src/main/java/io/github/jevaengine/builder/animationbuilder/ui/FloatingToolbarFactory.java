@@ -157,7 +157,7 @@ public final class FloatingToolbarFactory
 				public void onPress() {
 					try
 					{
-						final FileInputQuery query = new FileInputQueryFactory(m_windowManager, m_windowFactory).create(FileInputQueryMode.OpenFile, "Select a sprite file to preview:", m_baseDirectory);
+						final FileInputQuery query = new FileInputQueryFactory(m_windowManager, m_windowFactory, m_baseDirectory).create(FileInputQueryMode.OpenFile, "Select a sprite file to preview:", m_baseDirectory);
 						query.getObservers().add(new IFileInputQueryObserver() {
 							
 							@Override
