@@ -28,9 +28,7 @@ import io.github.jevaengine.joystick.IInputSource;
 import io.github.jevaengine.math.Vector2D;
 import io.github.jevaengine.ui.IWindowFactory;
 import io.github.jevaengine.ui.IWindowFactory.WindowConstructionException;
-
 import java.net.URI;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -24,9 +24,7 @@ import io.github.jevaengine.game.IRenderer;
 import io.github.jevaengine.graphics.ISpriteFactory;
 import io.github.jevaengine.joystick.IInputSource;
 import io.github.jevaengine.ui.IWindowFactory;
-
 import java.net.URI;
-
 import javax.inject.Inject;
 import javax.inject.Named;
 

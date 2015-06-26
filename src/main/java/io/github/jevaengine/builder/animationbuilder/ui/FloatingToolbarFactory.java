@@ -40,9 +40,7 @@ import io.github.jevaengine.ui.NoSuchControlException;
 import io.github.jevaengine.ui.Window;
 import io.github.jevaengine.ui.WindowBehaviourInjector;
 import io.github.jevaengine.ui.WindowManager;
-
 import java.net.URI;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

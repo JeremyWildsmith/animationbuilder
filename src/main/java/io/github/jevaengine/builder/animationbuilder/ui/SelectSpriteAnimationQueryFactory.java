@@ -41,7 +41,7 @@ import io.github.jevaengine.ui.WindowBehaviourInjector;
 import io.github.jevaengine.ui.WindowManager;
 import io.github.jevaengine.util.IObserverRegistry;
 import io.github.jevaengine.util.Observers;
-
+import java.awt.Color;
 import java.awt.Graphics2D;
 import java.net.URI;
 
@@ -136,7 +136,7 @@ public final class SelectSpriteAnimationQueryFactory
 				{
 					IImmutableAnimation currentAnimation = m_sprite.getAnimation(m_sprite.getCurrentAnimation());
 					lblAnimationName.setText(currentAnimation.getName() + ":" + (currentAnimation.getCurrentFrameIndex() + 1) + "/" + currentAnimation.getTotalFrames());
-					m_sprite.update((int)(deltaTime * 0.1F));
+					m_sprite.update((int)(deltaTime));
 				}
 			});
 			addControl(timer);
@@ -145,7 +145,12 @@ public final class SelectSpriteAnimationQueryFactory
 				@Override
 				public void render(Graphics2D g, int x, int y, float scale)
 				{
-					m_sprite.render(g, x + spriteViewport.getBounds().width / 2, y + spriteViewport.getBounds().height / 2, scale);
+					Vector2D origin = new Vector2D(x + spriteViewport.getBounds().width / 2, y + spriteViewport.getBounds().height / 2);
+					m_sprite.render(g, origin.x, y + spriteViewport.getBounds().height / 2, scale);
+					
+					g.setColor(Color.red);
+					g.drawLine(origin.x, origin.y - 2, origin.x, origin.y + 2);
+					g.drawLine(origin.x - 2, origin.y, origin.x + 2, origin.y);
 				}
 			});
 			
@@ -158,7 +163,7 @@ public final class SelectSpriteAnimationQueryFactory
 						
 						try
 						{
-							m_sprite.setAnimation(m_animations[m_currentAnimation], AnimationState.PlayToEnd);
+							m_sprite.setAnimation(m_animations[m_currentAnimation], AnimationState.Play);
 						} catch(NoSuchSpriteAnimation e)
 						{
 							//Since sprites are discovered and then accessed programatically, the only way for this exception to occur is via
@@ -180,7 +185,7 @@ public final class SelectSpriteAnimationQueryFactory
 							m_currentAnimation--;
 
 						try {
-							m_sprite.setAnimation(m_animations[m_currentAnimation], AnimationState.PlayToEnd);
+							m_sprite.setAnimation(m_animations[m_currentAnimation], AnimationState.Play);
 						} catch (NoSuchSpriteAnimation e)
 						{
 							//Since these animations are chosen by our logic, and their ability to

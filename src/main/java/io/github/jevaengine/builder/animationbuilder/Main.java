@@ -18,7 +18,13 @@
  */
 package io.github.jevaengine.builder.animationbuilder;
 
+import com.google.inject.AbstractModule;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import com.google.inject.name.Names;
 import io.github.jevaengine.IAssetStreamFactory;
+import io.github.jevaengine.audio.IAudioClipFactory;
+import io.github.jevaengine.audio.NullAudioClipFactory;
 import io.github.jevaengine.builder.BuilderAssetStreamFactory;
 import io.github.jevaengine.config.CachedConfigurationFactory;
 import io.github.jevaengine.config.IConfigurationFactory;
@@ -36,23 +42,19 @@ import io.github.jevaengine.game.IGameFactory;
 import io.github.jevaengine.game.IRenderer;
 import io.github.jevaengine.graphics.BufferedImageGraphicFactory;
 import io.github.jevaengine.graphics.CachedGraphicFactory;
+import io.github.jevaengine.graphics.DefaultGraphicShaderFactory;
+import io.github.jevaengine.graphics.ExtentionMuxedGraphicFactory;
 import io.github.jevaengine.graphics.IGraphicFactory;
+import io.github.jevaengine.graphics.ShadedGraphicFactory;
 import io.github.jevaengine.joystick.FrameInputSource;
 import io.github.jevaengine.joystick.IInputSource;
 import io.github.jevaengine.math.Matrix3X3;
-import io.github.jevaengine.script.IScriptBuilder;
-import io.github.jevaengine.script.NullScriptBuilder;
 import io.github.jevaengine.util.Nullable;
-import io.github.jevaengine.world.IWorldFactory;
-import io.github.jevaengine.world.IWorldFactory.NullWorldFactory;
-import io.github.jevaengine.world.entity.IEntityFactory;
-import io.github.jevaengine.world.entity.NullEntityFactory;
-import io.github.jevaengine.world.physics.IPhysicsWorldFactory;
-import io.github.jevaengine.world.physics.NullPhysicsWorldFactory;
+import io.github.jevaengine.world.IEffectMapFactory;
+import io.github.jevaengine.world.TiledEffectMapFactory;
 import io.github.jevaengine.world.scene.ISceneBufferFactory;
 import io.github.jevaengine.world.scene.NullSceneBufferFactory;
 import io.github.jevaengine.world.scene.TopologicalOrthographicProjectionSceneBufferFactory;
-
 import java.awt.Color;
 import java.awt.Point;
 import java.awt.Toolkit;
@@ -63,20 +65,13 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
-
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.inject.AbstractModule;
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-import com.google.inject.name.Names;
-import java.lang.reflect.InvocationTargetException;
 
 public class Main implements WindowListener, Runnable
 {
@@ -184,25 +179,26 @@ public class Main implements WindowListener, Runnable
 		protected void configure()
 		{
 			bind(URI.class).annotatedWith(Names.named("BASE_DIRECTORY")).toInstance(m_assetSource);
+			
 			bind(IInputSource.class).toInstance(FrameInputSource.create(m_frame));
-			bind(IScriptBuilder.class).toInstance(new NullScriptBuilder());
 			bind(IGameFactory.class).to(AnimationBuilderFactory.class);
-			bind(IPhysicsWorldFactory.class).to(NullPhysicsWorldFactory.class);
-			bind(IEntityFactory.class).to(NullEntityFactory.class);
-			bind(IWorldFactory.class).to(NullWorldFactory.class);
-			bind(ISceneBufferFactory.class).toInstance(m_sceneBufferFactory);
+			bind(IAudioClipFactory.class).toInstance(new NullAudioClipFactory());
+			bind(IEffectMapFactory.class).to(TiledEffectMapFactory.class);
 			
 			IAssetStreamFactory assetStreamFactory = new BuilderAssetStreamFactory(m_assetSource);
 			IRenderer frameRenderer = new FrameRenderer(m_frame, false, RenderFitMode.Stretch);
-			
-			bind(IRenderer.class).toInstance(frameRenderer);
-			bind(IGraphicFactory.class).toInstance(new CachedGraphicFactory(new BufferedImageGraphicFactory(frameRenderer, assetStreamFactory)));
+			IConfigurationFactory configurationFactory = new CachedConfigurationFactory(new JsonConfigurationFactory(assetStreamFactory));
 			bind(IAssetStreamFactory.class).toInstance(assetStreamFactory);
+			bind(IRenderer.class).toInstance(frameRenderer);
 			
-			if(m_enableCache)
-				bind(IConfigurationFactory.class).toInstance(new CachedConfigurationFactory(new JsonConfigurationFactory(assetStreamFactory)));
-			else
-				bind(IConfigurationFactory.class).toInstance(new JsonConfigurationFactory(assetStreamFactory));
+			ExtentionMuxedGraphicFactory muxedGraphicFactory = new ExtentionMuxedGraphicFactory(new BufferedImageGraphicFactory(frameRenderer, assetStreamFactory));
+			IGraphicFactory graphicFactory = new CachedGraphicFactory(muxedGraphicFactory);
+			muxedGraphicFactory.put(".sgf", new ShadedGraphicFactory(new DefaultGraphicShaderFactory(configurationFactory), graphicFactory, configurationFactory));
+			
+			bind(IGraphicFactory.class).toInstance(graphicFactory);
+			
+			bind(IConfigurationFactory.class).toInstance(configurationFactory);
+			
 		}
 	}
 	
